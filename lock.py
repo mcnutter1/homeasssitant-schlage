@@ -71,10 +71,10 @@ class SchlageLock(LockEntity):
         """Return true if the lock is locked."""
         return self._schlage_device.api.states[self._id]["lockState"]
 
-    def lock(self, **kwargs):
+    async def async_lock(self, **kwargs):
         """Lock the device."""
         lockResult = await self._schlage_device.api.lock(self._id)
-    def unlock(self, **kwargs):
+    async def async_unlock(self, **kwargs):
         """Unlock the device."""
         lockResult = await self._schlage_device.api.unlock(self._id)
     @property
