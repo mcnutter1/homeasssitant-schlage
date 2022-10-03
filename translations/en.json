@@ -1,0 +1,22 @@
+{
+  "title" : "Schlage Locks",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Provide Schlage Credentials",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect, please try again",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Schlage is already configured"
+    }
+  }
+}
