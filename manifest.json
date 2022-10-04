@@ -1,6 +1,6 @@
 {
   "domain": "schlage",
-  "name": "Schlage Locks",
+  "name": "Schlage Encode Lock",
   "config_flow": true,
   "documentation": "https://github.com/mcnutter1/homeasssitant-schlage",
   "codeowners": ["@mcnutter1"],

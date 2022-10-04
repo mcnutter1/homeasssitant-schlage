@@ -43,7 +43,7 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 DEFAULT_UPDATE_RATE = timedelta(seconds=15)
-PLATFORMS = ['lock']
+PLATFORMS = ['lock', 'sensor']
 
 async def async_setup(hass, config) -> bool:
     conf = config.get(DOMAIN)

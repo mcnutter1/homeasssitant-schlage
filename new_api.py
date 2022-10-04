@@ -119,6 +119,8 @@ class SchlageAPI:
         for device in self.devices:
             device_state ={}
             device_state["lockState"] = bool(device['attributes']['lockState'])
+            device_state["batteryLife"] = device['attributes']['batteryLevel']
+            device_state["available"] = device['connected']
             device_states[device['deviceId']] = device_state
         self.states = device_states
 
