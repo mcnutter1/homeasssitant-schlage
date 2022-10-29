@@ -3,7 +3,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "Provide Schlage Credentials",
         "data": {
           "username": "Username",
           "password": "Password"
