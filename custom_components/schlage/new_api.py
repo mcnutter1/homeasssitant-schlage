@@ -1,15 +1,10 @@
-import requests
 import logging
-import websocket
 import json
-import logging
 import asyncio
 import aiohttp
 import async_timeout
 import boto3
 from pycognito.aws_srp import AWSSRP
-from pprint import pprint
-import time
 
 API_TIMEOUT = 60
 _LOGGER = logging.getLogger(__name__)
