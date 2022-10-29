@@ -124,5 +124,5 @@ class SchlageDevice:
         await self.api.update()
         devices = self.api.devices
         for device in devices:
-           print("Lock: {}, ID: {}, State: {}".format(device['name'],device['deviceId'], device['attributes']['lockState']))
+           _LOGGER.debug("Lock: {}, ID: {}, State: {}".format(device['name'],device['deviceId'], device['attributes']['lockState']))
         async_dispatcher_send(self.hass, TOPIC_UPDATE)
