@@ -1,11 +1,14 @@
 {
+  "title" : "Schlage Locks",
   "config": {
     "step": {
       "user": {
         "data": {
           "username": "Username",
           "password": "Password"
-        }
+        },
+        "description": "Provide Schlage Credentials",
+        "title": "Authentication"
       }
     },
     "error": {
