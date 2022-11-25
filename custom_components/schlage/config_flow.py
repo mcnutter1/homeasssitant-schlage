@@ -1,4 +1,3 @@
-
 import logging
 
 from requests.exceptions import ConnectTimeout, HTTPError
@@ -21,8 +20,8 @@ async def validate_input(hass: core.HomeAssistant, data):
     """Validate the user input allows us to connect.
     Data has the keys from DATA_SCHEMA with values provided by the user.
     """
-    username=data[CONF_USERNAME],
-    password=data[CONF_PASSWORD]
+    username = (data[CONF_USERNAME],)
+    password = data[CONF_PASSWORD]
     info = {"title": username, "account_id": username}
     _LOGGER.debug("Setup ok with info: %s", info)
     return info
@@ -48,10 +47,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
 
             if "base" not in errors:
-                
+
                 await self.async_set_unique_id(info["account_id"])
                 self._abort_if_unique_id_configured()
-                return self.async_create_entry(title=info["title"], data=user_input)
+                return self.async_create_entry(title="Schlage Locks", data=user_input)
 
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors

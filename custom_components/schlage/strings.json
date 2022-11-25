@@ -3,11 +3,12 @@
   "config": {
     "step": {
       "user": {
-        "title": "Provide Schlage Credentials",
         "data": {
           "username": "Username",
           "password": "Password"
-        }
+        },
+        "description": "Provide Schlage Credentials",
+        "title": "Authentication"
       }
     },
     "error": {
