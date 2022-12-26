@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+from pyschlage import Auth
+from pyschlage.exceptions import NotAuthorizedError
 import voluptuous as vol
 
 from homeassistant import config_entries, core, exceptions
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 
-from .const import DOMAIN
+from .const import DOMAIN, LOGGER
 
-DATA_SCHEMA = vol.Schema({CONF_USERNAME: str, CONF_PASSWORD: str})
+DATA_SCHEMA = vol.Schema(
+    {vol.Required(CONF_USERNAME): str, vol.Required(CONF_PASSWORD): str}
+)
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -25,11 +29,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
         if user_input is not None:
-            # TODO: Validate username & password; set errors accordingly.
             username = user_input[CONF_USERNAME]
             password = user_input[CONF_PASSWORD]
-            await self.async_set_unique_id(info["account_id"])
-            return self.async_create_entry(title="Schlage", data=user_input)
+            try:
+                auth = Auth(username, password)
+                auth.authenticate()
+            except NotAuthorizedError:
+                LOGGER.exception("Authentication error")
+                errors["base"] = "invalid_auth"
+            except Exception:
+                LOGGER.exception("Unknown error")
+                errors["base"] = "unknown"
+            else:
+                await self.async_set_unique_id(username.lower())
+                return self.async_create_entry(title=username, data=user_input)
 
         return self.async_show_form(
             step_id="user", data_schema=DATA_SCHEMA, errors=errors
