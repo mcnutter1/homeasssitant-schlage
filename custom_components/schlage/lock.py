@@ -1,4 +1,3 @@
-
 import logging
 from typing import Any, Dict, Optional
 
@@ -22,27 +21,21 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
 
-
     SchlageAccount = hass.data[DOMAIN][config_entry.entry_id]
     devices = SchlageAccount.api.devices
     entities = []
     for device in devices:
-           entities.append(SchlageLock(device['name'], device['deviceId'], SchlageAccount))
-    
+        entities.append(SchlageLock(device["name"], device["deviceId"], SchlageAccount))
+
     async_add_entities(entities, True)
 
 
-
-
 class SchlageLock(LockEntity):
-
-
     def __init__(self, name, device_id, schlage_device):
 
         self._name = name
         self._id = device_id
         self._schlage_device = schlage_device
-
 
         self._state: Dict[str, Any] = {}
 
@@ -62,10 +55,12 @@ class SchlageLock(LockEntity):
     def name(self) -> str:
         """Return the name of the device if any."""
         return "{} Lock".format(self._name)
+
     @property
     def unique_id(self) -> str:
         """Return an unique ID."""
         return slugify("{}_lock".format(self._id))
+
     @property
     def is_locked(self) -> bool:
         """Return true if the lock is locked."""
@@ -74,22 +69,26 @@ class SchlageLock(LockEntity):
     async def async_lock(self, **kwargs):
         """Lock the device."""
         lockResult = await self._schlage_device.api.lock(self._id)
+
     async def async_unlock(self, **kwargs):
         """Unlock the device."""
         lockResult = await self._schlage_device.api.unlock(self._id)
+
     @property
     def device_info(self):
         device_info = {
             "identifiers": {(DOMAIN, self._id)},
             "name": self._name,
             "manufacturer": "Schlage",
-            "model" : "Encode"
+            "model": "Encode",
         }
         return device_info
+
     async def async_update(self) -> None:
         """Get the latest data and update the state."""
-        
+
         _LOGGER.debug("%s -> self._state: %s", self._name, self._state)
+
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""
 
@@ -106,5 +105,3 @@ class SchlageLock(LockEntity):
         """Disconnect dispatcher listener when removed."""
         if self._async_unsub_dispatcher_connect:
             self._async_unsub_dispatcher_connect()
-
-
