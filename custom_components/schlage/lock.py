@@ -1,44 +1,31 @@
-import logging
-from typing import Any, Dict, Optional
+"""Support for Schlage WiFi locks."""
 
-
-from homeassistant.helpers.entity import Entity
+from typing import Any, Dict
 
 from homeassistant.components.lock import LockEntity
-from homeassistant.const import STATE_LOCKED, STATE_UNLOCKED
-from homeassistant.config_entries import ConfigEntry
-
-from homeassistant.const import CONF_ID, CONF_TYPE
 from homeassistant.core import callback
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import slugify
 
 
-from .const import DOMAIN, TOPIC_UPDATE
-
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN, LOGGER, TOPIC_UPDATE
 
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
-
-    SchlageAccount = hass.data[DOMAIN][config_entry.entry_id]
-    devices = SchlageAccount.api.devices
+    data = hass.data[DOMAIN][config_entry.entry_id]
     entities = []
-    for device in devices:
-        entities.append(SchlageLock(device["name"], device["deviceId"], SchlageAccount))
-
+    for device in data.api.devices:
+        entities.append(SchlageLock(device["name"], device["deviceId"], data.api))
     async_add_entities(entities, True)
 
 
 class SchlageLock(LockEntity):
-    def __init__(self, name, device_id, schlage_device):
 
+    def __init__(self, name, device_id, api):
         self._name = name
         self._id = device_id
-        self._schlage_device = schlage_device
-
+        self._api = api
         self._state: Dict[str, Any] = {}
-
         self._async_unsub_dispatcher_connect = None
 
     @property
@@ -49,7 +36,7 @@ class SchlageLock(LockEntity):
     @property
     def available(self) -> bool:
         """Return true if entity is available."""
-        return self._schlage_device.api.states[self._id]["available"]
+        return self._api.states[self._id]["available"]
 
     @property
     def name(self) -> str:
@@ -64,15 +51,15 @@ class SchlageLock(LockEntity):
     @property
     def is_locked(self) -> bool:
         """Return true if the lock is locked."""
-        return self._schlage_device.api.states[self._id]["lockState"]
+        return self._api.states[self._id]["lockState"]
 
     async def async_lock(self, **kwargs):
         """Lock the device."""
-        lockResult = await self._schlage_device.api.lock(self._id)
+        lockResult = await self._api.lock(self._id)
 
     async def async_unlock(self, **kwargs):
         """Unlock the device."""
-        lockResult = await self._schlage_device.api.unlock(self._id)
+        lockResult = await self._api.unlock(self._id)
 
     @property
     def device_info(self):
@@ -86,8 +73,7 @@ class SchlageLock(LockEntity):
 
     async def async_update(self) -> None:
         """Get the latest data and update the state."""
-
-        _LOGGER.debug("%s -> self._state: %s", self._name, self._state)
+        LOGGER.debug("%s -> self._state: %s", self._name, self._state)
 
     async def async_added_to_hass(self) -> None:
         """Register callbacks."""

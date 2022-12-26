@@ -1,13 +1,8 @@
-from datetime import timedelta
+"""Constants for the Schlage WiFi integration."""
+
+import logging
+
+LOGGER = logging.getLogger(__package__)
 
 DOMAIN = "schlage"
-DATA_SCHLAGE_API = f"data_{DOMAIN}"
-
-CONF_DATA = "data"
-
-
-# platforms
 TOPIC_UPDATE = f"{DOMAIN}_data_update"
-
-# flap
-BATTERY_ICON = "mdi:battery"

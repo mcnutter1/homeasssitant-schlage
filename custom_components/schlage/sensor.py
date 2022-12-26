@@ -1,56 +1,71 @@
-import logging
-from homeassistant.components.sensor import SensorDeviceClass
+"""Sensors for Schlage WiFi locks."""
 
-
-from homeassistant.helpers.entity import Entity
-
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.core import callback
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.util import slugify
 
-
-from .const import DOMAIN, TOPIC_UPDATE, BATTERY_ICON
-
-_LOGGER = logging.getLogger(__name__)
+from .const import DOMAIN, LOGGER, TOPIC_UPDATE
 
 
-async def async_setup_entry(hass, config_entry, async_add_entities):
-
-    SchlageAccount = hass.data[DOMAIN][config_entry.entry_id]
-    devices = SchlageAccount.api.devices
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
+) -> None:
+    """Set up sensors based on a config entry."""
+    data = hass.data[DOMAIN][config_entry.entry_id]
     entities = []
-    for device in devices:
-        entities.append(
-            SchlageBatteryLifeSensor(device["name"], device["deviceId"], SchlageAccount)
-        )
+    for device in data.api.devices:
+        entities.append(BatterySensor(device["name"], device["deviceId"], data.api))
     async_add_entities(entities, True)
 
 
-class SchlageSensor(Entity):
-    def __init__(self, name, device_id, schlage_device):
+class BatterySensor(SensorEntity):
 
+    _attr_should_poll = False
+    _attr_device_class = SensorDeviceClass.BATTERY
+    _attr_icon = "mdi:battery"
+
+    def __init__(self, name, device_id, api):
         self._name = name
         self._id = device_id
-        self._schlage_device = schlage_device
+        self._api = api
         self._state = None
         self._async_unsub_dispatcher_connect = None
 
     @property
-    def should_poll(self) -> bool:
-        return False
-
-    @property
     def device_info(self):
-        device_info = {
+        return {
             "identifiers": {(DOMAIN, self._id)},
             "name": self._name,
             "manufacturer": "Schlage",
             "model": "Encode",
         }
-        return device_info
+
+    @property
+    def available(self) -> bool:
+        return self._api.states[self._id]["available"]
+
+    @property
+    def name(self) -> str:
+        return f"{self._name} Battery"
+
+    @property
+    def unique_id(self) -> str:
+        return slugify(f"{self._id}_battery_life_sensor")
+
+    @property
+    def state(self) -> str:
+        return self._api.states[self._id]["batteryLife"]
+
+    @property
+    def native_unit_of_measurement(self):
+        return "%"
 
     async def async_update(self) -> None:
-        _LOGGER.debug("%s -> self._state: %s", self._name, self._state)
+        LOGGER.debug("%s -> self._state: %s", self._name, self._state)
 
     async def async_added_to_hass(self) -> None:
         @callback
@@ -64,33 +79,3 @@ class SchlageSensor(Entity):
     async def async_will_remove_from_hass(self) -> None:
         if self._async_unsub_dispatcher_connect:
             self._async_unsub_dispatcher_connect()
-
-
-class SchlageBatteryLifeSensor(SchlageSensor):
-    @property
-    def available(self) -> bool:
-        return self._schlage_device.api.states[self._id]["available"]
-
-    @property
-    def name(self) -> str:
-        return "{} Battery Life Sensor".format(self._name)
-
-    @property
-    def unique_id(self) -> str:
-        return slugify("{}_battery_life_sensor".format(self._id))
-
-    @property
-    def state(self) -> str:
-        return self._schlage_device.api.states[self._id]["batteryLife"]
-
-    @property
-    def native_unit_of_measurement(self):
-        return "%"
-
-    @property
-    def device_class(self):
-        return SensorDeviceClass.BATTERY
-
-    @property
-    def icon(self):
-        return BATTERY_ICON
