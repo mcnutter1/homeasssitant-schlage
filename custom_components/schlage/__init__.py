@@ -1,33 +1,47 @@
 """Schlage Wifi Home Assistant Integration."""
 
-from typing import Any
 from datetime import timedelta
+from pyschlage import Auth, Schlage
 
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
+from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.dispatcher import async_dispatcher_send
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, TOPIC_UPDATE
-from .new_api import SchlageAPI
-
+from .const import DOMAIN, LOGGER, PLATFORMS
 
 UPDATE_INTERVAL = timedelta(seconds=15)
-PLATFORMS: list[Platform] = [Platform.LOCK, Platform.SENSOR]
+
+
+async def async_setup(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Schlage using YAML. (Not supported)."""
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Schlage from a config entry."""
-    api = SchlageAPI(entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD], hass.loop)
     hass.data.setdefault(DOMAIN, {})
-    schlage_data = hass.data[DOMAIN][entry.entry_id] = SchlageData(hass, api)
 
-    await schlage_data.async_update()
+    auth = await hass.async_add_executor_job(
+        Auth, entry.data[CONF_USERNAME], entry.data[CONF_PASSWORD]
+    )
+    api = Schlage(auth)
 
-    async_track_time_interval(hass, schlage_data.async_update, UPDATE_INTERVAL)
-    await hass.config_entrires.async_forward_entry_setups(entry, PLATFORMS)
+    async def async_update_data():
+        locks = await hass.async_add_executor_job(api.locks)
+        return {lock.device_id: lock for lock in locks}
+
+    coordinator = DataUpdateCoordinator(
+        hass,
+        LOGGER,
+        name=DOMAIN,
+        update_method=async_update_data,
+        update_interval=UPDATE_INTERVAL,
+    )
+    await coordinator.async_config_entry_first_refresh()
+    hass.data[DOMAIN][entry.entry_id] = coordinator
+
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
@@ -39,14 +53,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-class SchlageData:
-    """Data entry for Schlage."""
-
-    def __init__(self, hass: HomeAssistant, api: SchlageAPI) -> None:
-        """Initializer."""
-        self.hass = hass
-        self.api = api
-
-    async def async_update(self, arg: Any = None) -> None:
-        await self.api.update()
-        async_dispatcher_send(self.hass, TOPIC_UPDATE)
+async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload Schlage config entry."""
+    await async_unload_entry(hass, entry)
+    await async_setup_entry(hass, entry)
