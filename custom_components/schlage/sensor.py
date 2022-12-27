@@ -3,15 +3,16 @@
 from pyschlage import Lock
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.core import callback
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
 )
 
-from .const import DATA_COORDINATOR, DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER
 
 
 async def async_setup_entry(
@@ -20,8 +21,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up sensors based on a config entry."""
-    data = hass.data[DOMAIN][config_entry.entry_id]
-    coordinator = data[DATA_COORDINATOR]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     async_add_entities(
         [BatterySensor(coordinator, device_id) for device_id in coordinator.data.keys()]
     )

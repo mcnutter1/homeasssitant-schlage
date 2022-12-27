@@ -12,7 +12,7 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
 )
 
-from .const import DATA_COORDINATOR, DOMAIN, MANUFACTURER
+from .const import DOMAIN, MANUFACTURER
 
 
 async def async_setup_entry(
@@ -21,8 +21,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Schlage WiFi locks based on a config entry."""
-    data = hass.data[DOMAIN][config_entry.entry_id]
-    coordinator = hass.data[DATA_COORDINATOR]
+    coordinator = hass.data[DOMAIN][config_entry.entry_id]
     async_add_entities(
         [SchlageLock(coordinator, device_id) for device_id in coordinator.data.keys()]
     )
