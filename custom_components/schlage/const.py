@@ -2,9 +2,10 @@
 
 import logging
 
+from homeassistant.const import Platform
+
 LOGGER = logging.getLogger(__package__)
 
 DOMAIN = "schlage"
-DATA_API = "schlage_api"
-DATA_COORDINATOR = "schlage_coordinator"
 MANUFACTURER = "Schlage"
+PLATFORMS: list[Platform] = [Platform.LOCK, Platform.SENSOR]

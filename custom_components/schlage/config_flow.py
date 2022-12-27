@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pyschlage import Auth
 from pyschlage.exceptions import NotAuthorizedError
 import voluptuous as vol
 
-from homeassistant import config_entries, core, exceptions
+from homeassistant.config_entries import ConfigFlow
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.data_entry_flow import FlowResult
 
 from .const import DOMAIN, LOGGER
 
@@ -16,7 +19,7 @@ DATA_SCHEMA = vol.Schema(
 )
 
 
-class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ConfigFlow(ConfigFlow, domain=DOMAIN):
     """Schlage WiFi Config Flow."""
 
     VERSION = 1
