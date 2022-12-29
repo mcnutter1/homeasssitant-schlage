@@ -48,7 +48,7 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
         self._attr_name = f"{self._lock.name} Battery"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, self._lock.device_id)},
-            name=self._attr_name,
+            name=f"{self._lock.name} Lock",
             manufacturer=MANUFACTURER,
             model=self._lock.model_name,
             sw_version=self._lock.firmware_version,
