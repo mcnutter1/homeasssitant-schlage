@@ -35,8 +35,8 @@ class ConfigFlow(ConfigFlow, domain=DOMAIN):
             username = user_input[CONF_USERNAME]
             password = user_input[CONF_PASSWORD]
             try:
-                auth = Auth(username, password)
-                auth.authenticate()
+                auth = await self.hass.async_add_executor_job(Auth, username, password)
+                await self.hass.async_add_executor_job(auth.authenticate)
             except NotAuthorizedError:
                 LOGGER.exception("Authentication error")
                 errors["base"] = "invalid_auth"

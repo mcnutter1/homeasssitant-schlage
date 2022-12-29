@@ -2,14 +2,9 @@
 from unittest.mock import patch
 
 from homeassistant import config_entries, data_entry_flow
-from homeassistant.const import Platform
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.schlage.const import (
-    DOMAIN,
-    PLATFORMS,
-)
+from custom_components.schlage.const import DOMAIN
 
 from .const import MOCK_CONFIG
 

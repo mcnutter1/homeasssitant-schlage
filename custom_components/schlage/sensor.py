@@ -53,9 +53,9 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
             model=self._lock.model_name,
             sw_version=self._lock.firmware_version,
         )
-        self.async_write_ha_state()
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self._update_attrs()
+        self.async_write_ha_state()

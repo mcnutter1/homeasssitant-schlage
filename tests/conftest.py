@@ -14,7 +14,7 @@
 #
 # See here for more info: https://docs.pytest.org/en/latest/fixture.html (note that
 # pytest includes fixtures OOB which you can use as defined on this page)
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 from pyschlage.exceptions import NotAuthorizedError
 import pytest
