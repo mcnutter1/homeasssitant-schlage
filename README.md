@@ -1,4 +1,4 @@
-# homeasssitant-schlage
+# Schlage WiFi locks integration for Home Assistant
 A Home Assistant custom integration for Schlage Encode (and similar) WiFi locks.
 
 ## Installation
