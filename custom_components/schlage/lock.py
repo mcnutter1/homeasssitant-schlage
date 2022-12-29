@@ -45,6 +45,7 @@ class SchlageLock(CoordinatorEntity, LockEntity):
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self._update_attrs()
+        self.async_write_ha_state()
 
     def _update_attrs(self) -> None:
         self._attr_name = f"{self._lock.name} Lock"
@@ -57,14 +58,15 @@ class SchlageLock(CoordinatorEntity, LockEntity):
             model=self._lock.model_name,
             sw_version=self._lock.firmware_version,
         )
-        self.async_write_ha_state()
 
     async def async_lock(self, **kwargs):
         """Lock the device."""
         await self.hass.async_add_executor_job(self._lock.lock)
         self._update_attrs()
+        self.async_write_ha_state()
 
     async def async_unlock(self, **kwargs):
         """Unlock the device."""
-        await self.hass.async_add_executor_job(self.lock.unlock)
+        await self.hass.async_add_executor_job(self._lock.unlock)
         self._update_attrs()
+        self.async_write_ha_state()
