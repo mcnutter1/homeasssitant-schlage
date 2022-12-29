@@ -1,0 +1,5 @@
+name-template: $RESOLVED_VERSION **UPDATE manifest.json BEFORE PUBLISHING**
+tag-template: $RESOLVED_VERSION
+template: |
+  ## What’s Changed
+  $CHANGES
