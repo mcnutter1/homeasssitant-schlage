@@ -4,6 +4,7 @@ from pyschlage import Lock
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import PERCENTAGE
 from homeassistant.core import callback, HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -32,6 +33,7 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
 
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_native_unit_of_measurement = PERCENTAGE
 
     def __init__(self, coordinator: DataUpdateCoordinator, device_id: str) -> None:
         super().__init__(coordinator)
