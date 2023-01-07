@@ -1,8 +1,7 @@
-
 import logging
 from typing import Any, Dict, List
 from datetime import timedelta
-from . new_api import (SchlageAPI)
+from .new_api import SchlageAPI
 import asyncio
 import voluptuous as vol
 
@@ -21,11 +20,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.event import async_track_time_interval
 
-from .const import (
-    DOMAIN,
-    DATA_SCHLAGE_API,
-    TOPIC_UPDATE
-)
+from .const import DOMAIN, DATA_SCHLAGE_API, TOPIC_UPDATE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,34 +38,25 @@ CONFIG_SCHEMA = vol.Schema(
 )
 
 DEFAULT_UPDATE_RATE = timedelta(seconds=15)
-PLATFORMS = ['lock', 'sensor']
+PLATFORMS = ["lock", "sensor"]
+
 
 async def async_setup(hass, config) -> bool:
     conf = config.get(DOMAIN)
     hass.data.setdefault(DOMAIN, {})
 
-
     if not conf:
         return True
 
-    
- 
     hass.async_create_task(
         hass.config_entries.flow.async_init(
             DOMAIN, context={"source": SOURCE_IMPORT}, data=conf
         )
     )
     return True
-   
-    schlageAPIObject = SchlageAPI(
-            conf[CONF_USERNAME],
-            conf[CONF_PASSWORD],
-            hass.loop
-        )
 
+    schlageAPIObject = SchlageAPI(conf[CONF_USERNAME], conf[CONF_PASSWORD], hass.loop)
 
-    
-   
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
@@ -79,14 +65,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     password = conf[CONF_PASSWORD]
     scan_interval = DEFAULT_UPDATE_RATE
 
-    API =  SchlageAPI(conf[CONF_USERNAME],conf[CONF_PASSWORD],hass.loop)
+    API = SchlageAPI(conf[CONF_USERNAME], conf[CONF_PASSWORD], hass.loop)
     hass.data.setdefault(DOMAIN, {})
     hub = hass.data[DOMAIN][entry.entry_id] = SchlageDevice(hass, API)
-    
+
     await hub.async_update()
 
     async_track_time_interval(hass, hub.async_update, scan_interval)
-
 
     for component in PLATFORMS:
         hass.async_create_task(
@@ -110,19 +95,24 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     return unload_ok
 
-class SchlageDevice:
 
+class SchlageDevice:
     def __init__(self, hass, api) -> None:
         """Initialize the Sure Petcare object."""
         self.hass = hass
         self.api = api
 
-
     async def async_update(self, arg: Any = None) -> None:
 
-        #await self.gdo.update()
+        # await self.gdo.update()
         await self.api.update()
         devices = self.api.devices
         for device in devices:
-           _LOGGER.debug("Lock: {}, ID: {}, State: {}".format(device['name'],device['deviceId'], device['attributes']['lockState']))
+            _LOGGER.debug(
+                "Lock: {}, ID: {}, State: {}".format(
+                    device["name"],
+                    device["deviceId"],
+                    device["attributes"]["lockState"],
+                )
+            )
         async_dispatcher_send(self.hass, TOPIC_UPDATE)
