@@ -32,6 +32,7 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
 
     _attr_device_class = SensorDeviceClass.BATTERY
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_unit_of_measurement = PERCENTAGE
 
     def __init__(self, coordinator: DataUpdateCoordinator, device_id: str) -> None:
         super().__init__(coordinator)
