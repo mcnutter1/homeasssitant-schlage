@@ -7,5 +7,5 @@
     "codeowners": ["@mcnutter1"],
     "requirements": [],
     "iot_class": "cloud_polling",
-    "version": "1.0",
+    "version": "1.0"
 }
