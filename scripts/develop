@@ -4,5 +4,11 @@ set -e
 
 cd "$(dirname "$0")/.."
 
+if [[ ! -d .hass ]]; then
+    mkdir .hass
+fi
+
+cd .hass
+
 # Start Home Assistant
 hass -c . --debug
