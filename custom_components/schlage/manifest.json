@@ -7,5 +7,5 @@
   "codeowners": ["@mcnutter1"],
   "requirements": ["pyschlage==2022.12.24"],
   "iot_class": "cloud_polling",
-  "version": "2023.1.1"
+  "version": "2023.2.0"
 }
