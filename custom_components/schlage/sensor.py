@@ -43,7 +43,7 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def _lock(self) -> Lock:
-        return self.coordinator.data[self.device_id]
+        return self.coordinator.data[self.device_id].lock
 
     def _update_attrs(self):
         self._attr_native_value = self._lock.battery_level

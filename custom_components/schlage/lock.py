@@ -1,6 +1,7 @@
 """Support for Schlage WiFi locks."""
 
 from pyschlage import Lock
+from pyschlage.log import LockLog
 
 from homeassistant.components.lock import LockEntity
 from homeassistant.config_entries import ConfigEntry
@@ -39,7 +40,11 @@ class SchlageLock(CoordinatorEntity, LockEntity):
 
     @property
     def _lock(self) -> Lock:
-        return self.coordinator.data[self.device_id]
+        return self.coordinator.data[self.device_id].lock
+
+    @property
+    def _logs(self) -> list[LockLog]:
+        return self.coordinator.data[self.device_id].logs
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -58,6 +63,13 @@ class SchlageLock(CoordinatorEntity, LockEntity):
             model=self._lock.model_name,
             sw_version=self._lock.firmware_version,
         )
+        if not self._logs:
+            self._attr_changed_by = None
+            return
+        want_msg_pfx = "Locked by " if self._lock.is_locked else "Unlocked by "
+        newest_log = max(self._logs, key=lambda log: log.created_at)
+        if newest_log.message.startswith(want_msg_pfx):
+            self._attr_changed_by = newest_log.message.lstrip(want_msg_pfx)
 
     async def async_lock(self, **kwargs):
         """Lock the device."""

@@ -1,7 +1,9 @@
 """Schlage Wifi Home Assistant Integration."""
 
+from dataclasses import dataclass
 from datetime import timedelta
-from pyschlage import Auth, Schlage
+from pyschlage import Auth, Lock, Schlage
+from pyschlage.log import LockLog
 
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
@@ -28,8 +30,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = Schlage(auth)
 
     async def async_update_data():
-        locks = await hass.async_add_executor_job(api.locks)
-        return {lock.device_id: lock for lock in locks}
+        data = {}
+        for lock in await hass.async_add_executor_job(api.locks):
+            logs = await hass.async_add_executor_job(lock.logs)
+            data[lock.device_id] = LockData(lock, logs)
+        return data
 
     coordinator = DataUpdateCoordinator(
         hass,
@@ -57,3 +62,11 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Reload Schlage config entry."""
     await async_unload_entry(hass, entry)
     await async_setup_entry(hass, entry)
+
+
+@dataclass
+class LockData:
+    """Container for lock data fetched from the Schlage API."""
+
+    lock: Lock
+    logs: list[LockLog]
