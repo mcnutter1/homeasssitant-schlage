@@ -4,11 +4,9 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-if [[ ! -d .hass ]]; then
-    mkdir .hass
-fi
-
+[[ ! -d .hass ]] && mkdir .hass
 cd .hass
+[[ ! -h custom_components ]] && ln -s ../custom_components .
 
 # Start Home Assistant
 hass -c . --debug
