@@ -1,4 +1,4 @@
-pytest==7.1.3
+pytest==7.2.1
 pytest-asyncio==0.20.3
-pytest-homeassistant-custom-component==0.12.21
+pytest-homeassistant-custom-component==0.13.1
 pyschlage==2023.2.2
