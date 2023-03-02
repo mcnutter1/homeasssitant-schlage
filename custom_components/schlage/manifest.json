@@ -10,7 +10,7 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/dknowles2/ha-schlage/issues",
   "requirements": [
-    "pyschlage==2023.2.2"
+    "pyschlage==2023.3.1"
   ],
   "version": "2023.2.1"
 }

@@ -24,7 +24,10 @@ async def async_setup_entry(
     """Set up sensors based on a config entry."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
     async_add_entities(
-        [BatterySensor(coordinator, device_id) for device_id in coordinator.data.keys()]
+        [
+            BatterySensor(coordinator, device_id)
+            for device_id in coordinator.data.locks.keys()
+        ]
     )
 
 
@@ -43,7 +46,7 @@ class BatterySensor(CoordinatorEntity, SensorEntity):
 
     @property
     def _lock(self) -> Lock:
-        return self.coordinator.data[self.device_id].lock
+        return self.coordinator.data.locks[self.device_id].lock
 
     def _update_attrs(self):
         self._attr_native_value = self._lock.battery_level
