@@ -2,8 +2,11 @@
 
 from dataclasses import dataclass
 from datetime import timedelta
-from pyschlage import Auth, Lock, Schlage
+from pyschlage import Auth, Schlage
+from pyschlage.code import AccessCode
+from pyschlage.lock import Lock
 from pyschlage.log import LockLog
+from pyschlage.user import User
 
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
@@ -30,11 +33,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api = Schlage(auth)
 
     async def async_update_data():
-        data = {}
+        locks = {}
         for lock in await hass.async_add_executor_job(api.locks):
+            access_codes = {
+                ac.access_code_id: ac
+                for ac in await hass.async_add_executor_job(lock.access_codes)
+            }
             logs = await hass.async_add_executor_job(lock.logs)
-            data[lock.device_id] = LockData(lock, logs)
-        return data
+            locks[lock.device_id] = LockData(lock, logs, access_codes)
+        users = {u.user_id: u for u in await hass.async_add_executor_job(api.users)}
+        return SchlageData(locks, users)
 
     coordinator = DataUpdateCoordinator(
         hass,
@@ -70,3 +78,12 @@ class LockData:
 
     lock: Lock
     logs: list[LockLog]
+    access_codes: dict[str, AccessCode]
+
+
+@dataclass
+class SchlageData:
+    """Container for all data fetched from the Schlage API."""
+
+    locks: dict[str, LockData]
+    users: dict[str, User]
